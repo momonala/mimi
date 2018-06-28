@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mememe
+  labels:
+    app: mememe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mememe
+  template:
+    metadata:
+      labels:
+        app: mememe
+    spec:
+      containers:
+      - name: mememe
+        image: docker.io/rjsvaljean/flask-test:mememe23
+        ports:
+        - containerPort: 5000
+        env:
+          - name: "N"
+            value: "1"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mememe-service
+spec:
+  type: NodePort
+  selector:
+    app: mememe
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mememe-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "mememe-ip"
+spec:
+  backend:
+    serviceName: mememe-service
+    servicePort: 80
